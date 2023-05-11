@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `users_quests` (
   `id` char(36) NOT NULL UNIQUE,
   `user_id` char(36) NOT NULL,
   `quest_id` char(36) NOT NULL,
+  `created_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`user_id`) REFERENCES users(`id`),
   FOREIGN KEY (`quest_id`) REFERENCES quests(`id`)

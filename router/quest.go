@@ -33,3 +33,17 @@ func getQuest(c echo.Context) error {
 
 	return echo.NewHTTPError(http.StatusOK, quest)
 }
+
+func completeQuest(c echo.Context) error {
+	ctx := c.Request().Context()
+	ID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
+	}
+	err = model.CompleteQuest(ctx, ID, uuid.Nil) //todo: userID
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	return echo.NewHTTPError(http.StatusOK, "ok")
+}

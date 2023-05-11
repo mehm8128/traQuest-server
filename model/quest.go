@@ -86,3 +86,12 @@ func GetTagsByQuestID(ctx context.Context, id uuid.UUID) ([]*Tag, error) {
 	}
 	return tags, nil
 }
+
+func CompleteQuest(ctx context.Context, questID, userID uuid.UUID) error {
+	createdAt := time.Now()
+	_, err := db.ExecContext(ctx, "INSERT INTO users_quests VALUES (?, ?, ?)", questID, userID, createdAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -6,8 +6,6 @@ CREATE TABLE IF NOT EXISTS `users` (
   `id` char(36) NOT NULL UNIQUE,
   `name` varchar(20) NOT NULL,
   `score` int(8) NOT NULL,
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NUll,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

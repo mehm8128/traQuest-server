@@ -1,0 +1,146 @@
+openapi: 3.1.0
+info:
+  title: traQuest
+  version: "1.0"
+servers:
+  - url: "/api"
+paths:
+  /users/signin:
+    get:
+      tags:
+        - Users
+      summary: ログイン
+      responses:
+        "200":
+          description: OK
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: 自分の情報を取得する。
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  "/quests/{id}":
+    get:
+      tags:
+        - Quests
+      summary: クエストの詳細を取得する。
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestDetail"
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: id
+        in: path
+        required: true
+  /quests:
+    get:
+      tags:
+        - Quests
+      summary: クエストの一覧を取得する。
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Quest"
+  /ranking:
+    get:
+      tags:
+        - Ranking
+      summary: ランキングを取得する。
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Ranking"
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+        completedQuests:
+          type: array
+          items:
+            format: uuid
+            type: string
+        score:
+          type: integer
+    Quest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        level:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+        completed:
+          type: boolean
+    QuestDetail:
+      allOf:
+        - $ref: "#/components/schemas/Quest"
+        - type: object
+          properties:
+            completedUsers:
+              type: array
+              format: uuid
+              items:
+                type: string
+                format: uuid
+    Tag:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    Ranking:
+      type: object
+      properties:
+        rank:
+          type: integer
+        userId:
+          type: string
+          format: uuid
+        score:
+          type: integer

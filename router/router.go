@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -26,22 +27,22 @@ func SetRouting(store *mysqlstore.MySQLStore) {
 		AllowCredentials: true,
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 	}))
+	defer store.Close()
+	defer store.StopCleanup(store.Cleanup(time.Minute * 5))
 
 	api := e.Group("/api")
 	{
 		apiUsers := api.Group("/users")
 		{
 			apiUsers.GET("/signin", getSignin)
-			apiUsers.GET("", getUsers)
 			apiUsers.GET("/me", getMe)
 		}
 		apiQuests := api.Group("/quests")
 		{
 			apiQuests.GET("", getQuests)
-			apiQuests.POST("", postQuest)
 			apiQuests.GET("/:id", getQuest)
-			apiQuests.PUT("/:id", putQuest)
-			apiQuests.GET("/user/:id", getQuestsByUser)
+			//apiQuests.POST("", postQuest)
+			//apiQuests.PUT("/:id", putQuest)
 		}
 		apiRanking := api.Group("/ranking")
 		{

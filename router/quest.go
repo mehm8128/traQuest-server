@@ -10,7 +10,7 @@ import (
 
 func getQuests(c echo.Context) error {
 	ctx := c.Request().Context()
-	quests, err := model.GetQuests(ctx)
+	quests, err := model.GetQuests(ctx, uuid.Nil) //todo: userID
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)

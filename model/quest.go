@@ -15,13 +15,13 @@ type Quest struct {
 	Level       int       `json:"level" db:"level"`
 	CreatedAt   time.Time `json:"createdAt" db:"created_at"`
 	UpdatedAt   time.Time `json:"updatedAt" db:"updated_at"`
-	Tags        []string  `json:"tags"`
+	Tags        []*Tag    `json:"tags"`
 	Completed   bool      `json:"completed"`
 }
 
 type QuestDetail struct {
 	Quest
-	CompletedUsers []uuid.UUID `json:"completedUsers"`
+	CompletedUsers []*uuid.UUID `json:"completedUsers"`
 }
 
 type Tag struct {
@@ -30,12 +30,20 @@ type Tag struct {
 	CreatedAt time.Time `json:"createdAt" db:"created_at"`
 }
 
-func GetQuests(ctx context.Context) ([]*Quest, error) {
+func GetQuests(ctx context.Context, userID uuid.UUID) ([]*Quest, error) {
 	var quests []*Quest
-	// todo: userのcomplete状態を繋げる
-	err := db.SelectContext(ctx, &quests, "SELECT * FROM quests ORDER BY number")
+	// todo: completed怪しい
+	err := db.SelectContext(ctx, &quests, "SELECT quests.id, quests.number, quests.title, quests.description, quests.level, quests.created_at, quests.updated_at, users_quests.id as completed FROM quests LEFT JOIN users_quests ON quests.id = users_quests.quest_id ORDER BY number")
 	if err != nil {
 		return nil, err
+	}
+	//todo: n+1
+	for _, quest := range quests {
+		tags, err := GetTagsByQuestID(ctx, quest.ID)
+		if err != nil {
+			return nil, err
+		}
+		quest.Tags = tags
 	}
 
 	return quests, nil
@@ -43,11 +51,30 @@ func GetQuests(ctx context.Context) ([]*Quest, error) {
 
 func GetQuest(ctx context.Context, id uuid.UUID) (*QuestDetail, error) {
 	var quest QuestDetail
-	// todo: userのcomplete状態を繋げる
-	err := db.GetContext(ctx, &quest, "SELECT  FROM quests WHERE id = ?", id)
+	err := db.GetContext(ctx, &quest, "SELECT FROM quests WHERE id = ?", id)
 	if err != nil {
 		return nil, err
 	}
+	var count int
+	err = db.GetContext(ctx, &count, "SELECT COUNT(*) FROM users_quests WHERE quest_id = ?", id)
+	if err != nil {
+		return nil, err
+	}
+	if count > 0 {
+		quest.Completed = true
+	} else {
+		quest.Completed = false
+	}
+	tags, err := GetTagsByQuestID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	quest.Tags = tags
+	err = db.SelectContext(ctx, &quest.CompletedUsers, "SELECT user_id FROM users_quests WHERE quest_id = ?", id)
+	if err != nil {
+		return nil, err
+	}
+
 	return &quest, nil
 }
 

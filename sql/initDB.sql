@@ -33,5 +33,7 @@ CREATE TABLE IF NOT EXISTS `users_quests` (
   `id` char(36) NOT NULL UNIQUE,
   `user_id` char(36) NOT NULL,
   `quest_id` char(36) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES users(`id`),
+  FOREIGN KEY (`quest_id`) REFERENCES quests(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

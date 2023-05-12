@@ -42,9 +42,9 @@ func SetRouting(store *mysqlstore.MySQLStore) {
 			apiQuests.GET("", getQuests)
 			apiQuests.GET("/:id", getQuest)
 			apiQuests.POST("/:id/complete", completeQuest)
-			//apiQuests.POST("", postQuest)
-			//apiQuests.POST("/:id/approve", approveQuest)
-			//apiQuests.PUT("/:id", putQuest)
+			apiQuests.POST("", postQuest)
+			apiQuests.POST("/:id/approve", approveQuest)
+			apiQuests.PUT("/:id", putQuest)
 		}
 		apiRanking := api.Group("/ranking")
 		{

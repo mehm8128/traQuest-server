@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `quests` (
   `title` varchar(40) NOT NULL,
   `description` varchar(100) DEFAULT '',
   `level` int(2) NOT NULL,
+  `approved` boolean NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NUll,
   PRIMARY KEY (`id`)

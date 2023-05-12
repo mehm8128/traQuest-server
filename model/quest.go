@@ -21,7 +21,7 @@ type Quest struct {
 
 type QuestDetail struct {
 	Quest
-	CompletedUsers []*uuid.UUID `json:"completedUsers"`
+	CompletedUsers []uuid.UUID `json:"completedUsers"`
 }
 
 type Tag struct {
@@ -33,7 +33,25 @@ type Tag struct {
 func GetQuests(ctx context.Context, userID uuid.UUID) ([]*Quest, error) {
 	var quests []*Quest
 	// todo: completed怪しい
-	err := db.SelectContext(ctx, &quests, "SELECT quests.id, quests.number, quests.title, quests.description, quests.level, quests.created_at, quests.updated_at, users_quests.id as completed FROM quests LEFT JOIN users_quests ON quests.id = users_quests.quest_id ORDER BY number")
+	err := db.SelectContext(ctx, &quests, "SELECT quests.id, quests.number, quests.title, quests.description, quests.level, quests.created_at, quests.updated_at, users_quests.id as completed FROM quests LEFT JOIN users_quests ON quests.id = users_quests.quest_id WHERE quests.approved = true ORDER BY number")
+	if err != nil {
+		return nil, err
+	}
+	//todo: n+1
+	for _, quest := range quests {
+		tags, err := GetTagsByQuestID(ctx, quest.ID)
+		if err != nil {
+			return nil, err
+		}
+		quest.Tags = tags
+	}
+
+	return quests, nil
+}
+
+func GetUnapprovedQuests(ctx context.Context) ([]*Quest, error) {
+	var quests []*Quest
+	err := db.SelectContext(ctx, &quests, "SELECT * from quests WHERE approved = false ORDER BY number")
 	if err != nil {
 		return nil, err
 	}
@@ -94,4 +112,56 @@ func CompleteQuest(ctx context.Context, questID, userID uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+func CreateQuest(ctx context.Context, title string, description string, level int, tags []uuid.UUID) (*QuestDetail, error) {
+	ID := uuid.New()
+	createdAt := time.Now()
+
+	var count int
+	err := db.GetContext(ctx, &count, "SELECT number FROM quests ORDER BY number DESC LIMIT 1")
+	if err != nil {
+		return nil, err
+	}
+	_, err = db.ExecContext(ctx, "INSERT INTO quests (id, number, title, description, level, approved, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", ID, count, title, description, level, false, createdAt, createdAt)
+	if err != nil {
+		return nil, err
+	}
+
+	quest, err := GetQuest(ctx, ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return quest, nil
+}
+
+func ApproveQuest(ctx context.Context, id uuid.UUID) (*QuestDetail, error) {
+	quest, err := GetQuest(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.ExecContext(ctx, "UPDATE quests SET approved=true WHERE id =?", id)
+	if err != nil {
+		return nil, err
+	}
+
+	return quest, nil
+}
+
+func UpdateQuest(ctx context.Context, id uuid.UUID, title string, description string, level int, tags []uuid.UUID) (*QuestDetail, error) {
+	updatedAt := time.Now()
+
+	_, err := db.ExecContext(ctx, "UPDATE quests SET id=?, title=?, description=?, level=?, approved=?, updated_at=?) VALUES (?, ?, ?, ?, ?, ?)", id, title, description, level, false, updatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	quest, err := GetQuest(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return quest, nil
 }

@@ -28,6 +28,16 @@ CREATE TABLE IF NOT EXISTS `tags` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `tags_quests` (
+  `id` char(36) NOT NULL UNIQUE,
+  `tag_id` char(36) NOT NULL,
+  `quest_id` char(36) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+  FOREIGN KEY (`tag_id`) REFERENCES tags(`id`),
+  FOREIGN KEY (`quest_id`) REFERENCES quests(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE IF NOT EXISTS `users_quests` (
   `id` char(36) NOT NULL UNIQUE,
   `user_id` char(36) NOT NULL,

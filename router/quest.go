@@ -73,6 +73,9 @@ func postQuest(c echo.Context) error {
 func approveQuest(c echo.Context) error {
 	ctx := c.Request().Context()
 	ID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
+	}
 	res, err := model.ApproveQuest(ctx, ID)
 	if err != nil {
 		c.Logger().Error(err)

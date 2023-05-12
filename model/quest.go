@@ -24,9 +24,10 @@ type QuestDetail struct {
 	CompletedUsers []uuid.UUID `json:"completedUsers"`
 }
 
-type Tag struct {
+type TagQuest struct {
 	ID        uuid.UUID `json:"id" db:"id"`
-	Name      string    `json:"name" db:"name"`
+	TagID     uuid.UUID `json:"tagID" db:"tag_id"`
+	QuestID   uuid.UUID `json:"questID" db:"quest_id"`
 	CreatedAt time.Time `json:"createdAt" db:"created_at"`
 }
 
@@ -127,6 +128,19 @@ func CreateQuest(ctx context.Context, title string, description string, level in
 	if err != nil {
 		return nil, err
 	}
+	tagsQuests := make([]TagQuest, len(tags))
+	for i := range tags {
+		tagsQuests[i] = TagQuest{
+			ID:        uuid.New(),
+			TagID:     tags[i],
+			QuestID:   ID,
+			CreatedAt: createdAt,
+		}
+	}
+	_, err = db.NamedExec("INSERT INTO tags_quests (id, tag_id, quest_id, created_at) VALUES (:id, :tag_id, quest_id, created_at)", tagsQuests)
+	if err != nil {
+		return nil, err
+	}
 
 	quest, err := GetQuest(ctx, ID)
 	if err != nil {
@@ -157,6 +171,8 @@ func UpdateQuest(ctx context.Context, id uuid.UUID, title string, description st
 	if err != nil {
 		return nil, err
 	}
+	// todo: Stags_questsの更新
+	// 全部消してからあるやつを再INSERT
 
 	quest, err := GetQuest(ctx, id)
 	if err != nil {

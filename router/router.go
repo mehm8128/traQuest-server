@@ -46,6 +46,10 @@ func SetRouting(store *mysqlstore.MySQLStore) {
 			apiQuests.POST("/:id/approve", approveQuest)
 			apiQuests.PUT("/:id", putQuest)
 		}
+		apiTags := api.Group("/tags")
+		{
+			apiTags.POST("", postTag)
+		}
 		apiRanking := api.Group("/ranking")
 		{
 			apiRanking.GET("", getRanking)

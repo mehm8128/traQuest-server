@@ -14,7 +14,7 @@ type Tag struct {
 }
 
 func GetTags(ctx context.Context) ([]*Tag, error) {
-	var tags []*Tag
+	tags := make([]*Tag, 0)
 	err := db.SelectContext(ctx, &tags, "SELECT * from tags ORDER BY name")
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func GetTags(ctx context.Context) ([]*Tag, error) {
 }
 
 func GetTagsByQuestID(ctx context.Context, id uuid.UUID) ([]*Tag, error) {
-	var tags []*Tag
+	tags := make([]*Tag, 0)
 	err := db.SelectContext(ctx, &tags, "SELECT * FROM tags WHERE quest_id = ? ORDER BY name", id)
 	if err != nil {
 		return nil, err

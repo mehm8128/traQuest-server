@@ -7,7 +7,8 @@ import (
 )
 
 func getRanking(c echo.Context) error {
-	ranking, err := model.GetRanking()
+	ctx := c.Request().Context()
+	ranking, err := model.GetRanking(ctx)
 	if err != nil {
 		return err
 	}

@@ -2,21 +2,27 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-type Quest struct {
+type UnapprovedQuest struct {
 	ID          uuid.UUID `json:"id" db:"id"`
 	Number      int       `json:"number" db:"number"`
 	Title       string    `json:"title" db:"title"`
 	Description string    `json:"description" db:"description"`
 	Level       int       `json:"level" db:"level"`
+	Approved    bool      `json:"approved" db:"approved"`
 	CreatedAt   time.Time `json:"createdAt" db:"created_at"`
 	UpdatedAt   time.Time `json:"updatedAt" db:"updated_at"`
 	Tags        []*Tag    `json:"tags"`
-	Completed   bool      `json:"completed"`
+}
+
+type Quest struct {
+	UnapprovedQuest
+	Completed bool `json:"completed"`
 }
 
 type QuestDetail struct {
@@ -32,12 +38,15 @@ type TagQuest struct {
 }
 
 func GetQuests(ctx context.Context, userID uuid.UUID) ([]*Quest, error) {
-	var quests []*Quest
+	quests := make([]*Quest, 0)
 	// todo: completed怪しい
+	// todo: AND users_quests.user_id = ?
 	err := db.SelectContext(ctx, &quests, "SELECT quests.id, quests.number, quests.title, quests.description, quests.level, quests.created_at, quests.updated_at, users_quests.id as completed FROM quests LEFT JOIN users_quests ON quests.id = users_quests.quest_id WHERE quests.approved = true ORDER BY number")
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("model %+v", quests)
+
 	//todo: n+1
 	for _, quest := range quests {
 		tags, err := GetTagsByQuestID(ctx, quest.ID)
@@ -51,7 +60,7 @@ func GetQuests(ctx context.Context, userID uuid.UUID) ([]*Quest, error) {
 }
 
 func GetUnapprovedQuests(ctx context.Context) ([]*Quest, error) {
-	var quests []*Quest
+	quests := make([]*Quest, 0)
 	err := db.SelectContext(ctx, &quests, "SELECT * from quests WHERE approved = false ORDER BY number")
 	if err != nil {
 		return nil, err

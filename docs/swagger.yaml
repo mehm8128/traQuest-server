@@ -25,7 +25,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-  "/quests/{id}":
+  /quests/{id}:
     get:
       tags:
         - Quests
@@ -58,6 +58,88 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Quest"
+    post:
+      summary: クエストの作成を申請する。
+      tags:
+        - Quests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestRequest"
+      responses:
+        "201":
+          description: 作成に成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestDetail"
+    put:
+      summary: クエストを修正する。
+      tags:
+        - Quests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestRequest"
+      responses:
+        "200":
+          description: 修正に成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestDetail"
+  /quests/:id/complete:
+    post:
+      summary: クエストを完了する。
+      tags:
+        - Quests
+  /quests/:id/approve:
+    post:
+      summary: クエストの作成申請を承認する。
+      tags:
+        - Quests
+      responses:
+        "201":
+          description: 作成に成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestDetail"
+  /tags:
+    get:
+      tags:
+        - Tags
+      summary: タグの一覧を取得する。
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
+    post:
+      summary: タグを新規作成する。
+      tags:
+        - Tags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagRequest"
+      responses:
+        "201":
+          description: 作成に成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
   /ranking:
     get:
       tags:
@@ -123,6 +205,20 @@ components:
               items:
                 type: string
                 format: uuid
+    QuestRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        level:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+            format: uuid
     Tag:
       type: object
       properties:
@@ -134,6 +230,11 @@ components:
         createdAt:
           type: string
           format: date-time
+    TagRequest:
+      type: object
+      properties:
+        name:
+          type: string
     Ranking:
       type: object
       properties:

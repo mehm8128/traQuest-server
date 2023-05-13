@@ -97,15 +97,6 @@ func GetQuest(ctx context.Context, id uuid.UUID) (*QuestDetail, error) {
 	return &quest, nil
 }
 
-func GetTagsByQuestID(ctx context.Context, id uuid.UUID) ([]*Tag, error) {
-	var tags []*Tag
-	err := db.SelectContext(ctx, &tags, "SELECT * FROM tags WHERE quest_id = ?", id)
-	if err != nil {
-		return nil, err
-	}
-	return tags, nil
-}
-
 func CompleteQuest(ctx context.Context, questID, userID uuid.UUID) error {
 	createdAt := time.Now()
 	_, err := db.ExecContext(ctx, "INSERT INTO users_quests VALUES (?, ?, ?)", questID, userID, createdAt)

@@ -13,6 +13,25 @@ type Tag struct {
 	CreatedAt time.Time `json:"createdAt" db:"created_at"`
 }
 
+func GetTags(ctx context.Context) ([]*Tag, error) {
+	var tags []*Tag
+	err := db.SelectContext(ctx, &tags, "SELECT * from tags ORDER BY name")
+	if err != nil {
+		return nil, err
+	}
+
+	return tags, nil
+}
+
+func GetTagsByQuestID(ctx context.Context, id uuid.UUID) ([]*Tag, error) {
+	var tags []*Tag
+	err := db.SelectContext(ctx, &tags, "SELECT * FROM tags WHERE quest_id = ? ORDER BY name", id)
+	if err != nil {
+		return nil, err
+	}
+	return tags, nil
+}
+
 func CreateTag(ctx context.Context, name string) (*Tag, error) {
 	ID := uuid.New()
 	createdAt := time.Now()

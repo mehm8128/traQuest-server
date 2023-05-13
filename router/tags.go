@@ -11,6 +11,17 @@ type TagRequest struct {
 	Name string `json:"name"`
 }
 
+func getTags(c echo.Context) error {
+	ctx := c.Request().Context()
+	tags, err := model.GetTags(ctx)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return echo.NewHTTPError(http.StatusOK, tags)
+}
+
 func postTag(c echo.Context) error {
 	ctx := c.Request().Context()
 	var tag TagRequest

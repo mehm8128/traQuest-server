@@ -40,6 +40,7 @@ func SetRouting(store *mysqlstore.MySQLStore) {
 		apiQuests := api.Group("/quests")
 		{
 			apiQuests.GET("", getQuests)
+			apiQuests.GET("/unapproved", getUnapprovedQuests)
 			apiQuests.GET("/:id", getQuest)
 			apiQuests.POST("/:id/complete", completeQuest)
 			apiQuests.POST("", postQuest)
@@ -48,6 +49,7 @@ func SetRouting(store *mysqlstore.MySQLStore) {
 		}
 		apiTags := api.Group("/tags")
 		{
+			apiTags.GET("", getTags)
 			apiTags.POST("", postTag)
 		}
 		apiRanking := api.Group("/ranking")

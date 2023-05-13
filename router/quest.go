@@ -26,6 +26,18 @@ func getQuests(c echo.Context) error {
 	return echo.NewHTTPError(http.StatusOK, quests)
 }
 
+func getUnapprovedQuests(c echo.Context) error {
+	// todo: admin check
+	ctx := c.Request().Context()
+	quests, err := model.GetUnapprovedQuests(ctx)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return echo.NewHTTPError(http.StatusOK, quests)
+}
+
 func getQuest(c echo.Context) error {
 	ctx := c.Request().Context()
 	ID, err := uuid.Parse(c.Param("id"))

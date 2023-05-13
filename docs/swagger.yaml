@@ -25,25 +25,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-  /quests/{id}:
-    get:
-      tags:
-        - Quests
-      summary: クエストの詳細を取得する。
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/QuestDetail"
-    parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: id
-        in: path
-        required: true
   /quests:
     get:
       tags:
@@ -92,6 +73,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/QuestDetail"
+  /quests/unapproved:
+    get:
+      tags:
+        - Quests
+      summary: 未承認のクエストの一覧を取得する。
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UnapprovedQuest"
+  /quests/{id}:
+    get:
+      tags:
+        - Quests
+      summary: クエストの詳細を取得する。
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestDetail"
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: id
+        in: path
+        required: true
   /quests/:id/complete:
     post:
       summary: クエストを完了する。
@@ -168,7 +182,7 @@ components:
             type: string
         score:
           type: integer
-    Quest:
+    UnapprovedQuest:
       type: object
       properties:
         id:
@@ -192,8 +206,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Tag"
-        completed:
-          type: boolean
+    Quest:
+      allOf:
+        - $ref: "#/components/schemas/UnapprovedQuest"
+        - type: object
+          properties:
+            completed:
+              type: boolean
     QuestDetail:
       allOf:
         - $ref: "#/components/schemas/Quest"

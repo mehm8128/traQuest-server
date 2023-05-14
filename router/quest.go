@@ -23,7 +23,7 @@ func getQuests(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return echo.NewHTTPError(http.StatusOK, quests)
+	return echo.NewHTTPError(http.StatusOK, &quests)
 }
 
 func getUnapprovedQuests(c echo.Context) error {
@@ -35,7 +35,7 @@ func getUnapprovedQuests(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return echo.NewHTTPError(http.StatusOK, quests)
+	return echo.NewHTTPError(http.StatusOK, &quests)
 }
 
 func getQuest(c echo.Context) error {
@@ -50,7 +50,7 @@ func getQuest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return echo.NewHTTPError(http.StatusOK, quest)
+	return echo.NewHTTPError(http.StatusOK, &quest)
 }
 
 func completeQuest(c echo.Context) error {
@@ -79,7 +79,7 @@ func postQuest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	return echo.NewHTTPError(http.StatusCreated, res)
+	return echo.NewHTTPError(http.StatusCreated, &res)
 }
 
 func approveQuest(c echo.Context) error {
@@ -93,7 +93,7 @@ func approveQuest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	return echo.NewHTTPError(http.StatusCreated, res)
+	return echo.NewHTTPError(http.StatusCreated, &res)
 }
 
 func putQuest(c echo.Context) error {
@@ -112,5 +112,5 @@ func putQuest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	return echo.NewHTTPError(http.StatusOK, res)
+	return echo.NewHTTPError(http.StatusOK, &res)
 }

@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -41,14 +40,17 @@ func GetQuests(ctx context.Context, userID uuid.UUID) ([]*Quest, error) {
 	quests := make([]*Quest, 0)
 	// todo: completed怪しい
 	// todo: AND users_quests.user_id = ?
-	err := db.SelectContext(ctx, &quests, "SELECT quests.id, quests.number, quests.title, quests.description, quests.level, quests.created_at, quests.updated_at, users_quests.id as completed FROM quests LEFT JOIN users_quests ON quests.id = users_quests.quest_id WHERE quests.approved = true ORDER BY number")
+	err := db.SelectContext(ctx, &quests, "SELECT quests.id, quests.number, quests.title, quests.description, quests.level, quests.created_at, quests.updated_at FROM quests WHERE quests.approved = true ORDER BY number")
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("model %+v", quests)
 
 	//todo: n+1
 	for _, quest := range quests {
+		err := db.GetContext(ctx, &quest.Completed, "SELECT EXISTS(SELECT * FROM users_quests WHERE user_id = ? AND quest_id = ?)", userID, quest.ID)
+		if err != nil {
+			return nil, err
+		}
 		tags, err := GetTagsByQuestID(ctx, quest.ID)
 		if err != nil {
 			return nil, err
@@ -79,7 +81,7 @@ func GetUnapprovedQuests(ctx context.Context) ([]*Quest, error) {
 
 func GetQuest(ctx context.Context, id uuid.UUID) (*QuestDetail, error) {
 	var quest QuestDetail
-	err := db.GetContext(ctx, &quest, "SELECT FROM quests WHERE id = ?", id)
+	err := db.GetContext(ctx, &quest, "SELECT * FROM quests WHERE id = ?", id)
 	if err != nil {
 		return nil, err
 	}
@@ -98,10 +100,12 @@ func GetQuest(ctx context.Context, id uuid.UUID) (*QuestDetail, error) {
 		return nil, err
 	}
 	quest.Tags = tags
-	err = db.SelectContext(ctx, &quest.CompletedUsers, "SELECT user_id FROM users_quests WHERE quest_id = ?", id)
+	completedUsers := make([]uuid.UUID, 0)
+	err = db.SelectContext(ctx, &completedUsers, "SELECT user_id FROM users_quests WHERE quest_id = ?", id)
 	if err != nil {
 		return nil, err
 	}
+	quest.CompletedUsers = completedUsers
 
 	return &quest, nil
 }
@@ -120,26 +124,30 @@ func CreateQuest(ctx context.Context, title string, description string, level in
 	createdAt := time.Now()
 
 	var count int
-	err := db.GetContext(ctx, &count, "SELECT number FROM quests ORDER BY number DESC LIMIT 1")
+	err := db.Get(&count, "SELECT COUNT(*) FROM quests")
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		return nil, err
+	}
+	_, err = db.ExecContext(ctx, "INSERT INTO quests (id, number, title, description, level, approved, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", ID, count+1, title, description, level, false, createdAt, createdAt)
 	if err != nil {
 		return nil, err
 	}
-	_, err = db.ExecContext(ctx, "INSERT INTO quests (id, number, title, description, level, approved, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", ID, count, title, description, level, false, createdAt, createdAt)
-	if err != nil {
-		return nil, err
-	}
-	tagsQuests := make([]TagQuest, len(tags))
-	for i := range tags {
-		tagsQuests[i] = TagQuest{
-			ID:        uuid.New(),
-			TagID:     tags[i],
-			QuestID:   ID,
-			CreatedAt: createdAt,
+
+	if len(tags) != 0 {
+		tagsQuests := make([]TagQuest, len(tags))
+		for i := range tags {
+			tagsQuests[i] = TagQuest{
+				ID:        uuid.New(),
+				TagID:     tags[i],
+				QuestID:   ID,
+				CreatedAt: createdAt,
+			}
 		}
-	}
-	_, err = db.NamedExec("INSERT INTO tags_quests (id, tag_id, quest_id, created_at) VALUES (:id, :tag_id, quest_id, created_at)", tagsQuests)
-	if err != nil {
-		return nil, err
+
+		_, err = db.NamedExecContext(ctx, "INSERT INTO tags_quests (id, tag_id, quest_id, created_at) VALUES (:id, :tag_id, quest_id, created_at)", tagsQuests)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	quest, err := GetQuest(ctx, ID)

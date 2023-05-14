@@ -31,5 +31,5 @@ func getMe(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	return echo.NewHTTPError(http.StatusOK, user)
+	return echo.NewHTTPError(http.StatusOK, &user)
 }

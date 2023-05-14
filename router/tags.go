@@ -19,20 +19,20 @@ func getTags(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return echo.NewHTTPError(http.StatusOK, tags)
+	return echo.NewHTTPError(http.StatusOK, &tags)
 }
 
 func postTag(c echo.Context) error {
 	ctx := c.Request().Context()
-	var tag TagRequest
-	err := c.Bind(&tag)
+	var tags []string
+	err := c.Bind(&tags)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	res, err := model.CreateTag(ctx, tag.Name)
+	res, err := model.CreateTag(ctx, tags)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	return echo.NewHTTPError(http.StatusCreated, res)
+	return echo.NewHTTPError(http.StatusCreated, &res)
 }

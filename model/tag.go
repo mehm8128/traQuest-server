@@ -25,27 +25,30 @@ func GetTags(ctx context.Context) ([]*Tag, error) {
 
 func GetTagsByQuestID(ctx context.Context, id uuid.UUID) ([]*Tag, error) {
 	tags := make([]*Tag, 0)
-	err := db.SelectContext(ctx, &tags, "SELECT * FROM tags WHERE quest_id = ? ORDER BY name", id)
+	err := db.SelectContext(ctx, &tags, "SELECT tags.id, tags.name, tags.created_at FROM tags_quests JOIN tags ON tags.id = tags_quests.tag_id WHERE quest_id = ?", id)
 	if err != nil {
 		return nil, err
 	}
+
 	return tags, nil
 }
 
-func CreateTag(ctx context.Context, name string) (*Tag, error) {
-	ID := uuid.New()
-	createdAt := time.Now()
+func CreateTag(ctx context.Context, tags []string) ([]*Tag, error) {
+	newTags := make([]*Tag, 0)
+	for _, tag := range tags {
+		ID := uuid.New()
+		createdAt := time.Now()
+		newTags = append(newTags, &Tag{
+			ID:        ID,
+			Name:      tag,
+			CreatedAt: createdAt,
+		})
+	}
 
-	_, err := db.ExecContext(ctx, "INSERT INTO tags (id, name, created_at) VALUES (?, ?, ?)", ID, name, createdAt)
+	_, err := db.NamedExecContext(ctx, "INSERT INTO tags (id, name, created_at) VALUES (:id, :name, :created_at)", newTags)
 	if err != nil {
 		return nil, err
 	}
 
-	tag := &Tag{
-		ID:        ID,
-		Name:      name,
-		CreatedAt: createdAt,
-	}
-
-	return tag, nil
+	return newTags, nil
 }

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"net/http"
 	"traQuest/model"
 
 	"github.com/labstack/echo/v4"
@@ -12,5 +13,5 @@ func getRanking(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(200, ranking)
+	return echo.NewHTTPError(http.StatusOK, &ranking)
 }

@@ -34,7 +34,8 @@ func SetRouting(store *mysqlstore.MySQLStore) {
 	{
 		apiUsers := api.Group("/users")
 		{
-			apiUsers.GET("/signin", getSignin)
+			apiUsers.GET("/authorize", authorizeHandler)
+			apiUsers.GET("/callback", callbackHandler)
 			apiUsers.GET("/me", getMe)
 		}
 		apiQuests := api.Group("/quests")

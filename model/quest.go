@@ -144,7 +144,7 @@ func CreateQuest(ctx context.Context, title string, description string, level in
 			}
 		}
 
-		_, err = db.NamedExecContext(ctx, "INSERT INTO tags_quests (id, tag_id, quest_id, created_at) VALUES (:id, :tag_id, quest_id, created_at)", tagsQuests)
+		_, err = db.NamedExecContext(ctx, "INSERT INTO tags_quests (id, tag_id, quest_id, created_at) VALUES (:id, :tag_id, :quest_id, :created_at)", tagsQuests)
 		if err != nil {
 			return nil, err
 		}

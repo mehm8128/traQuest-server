@@ -179,7 +179,7 @@ func UpdateQuest(ctx context.Context, id uuid.UUID, title string, description st
 	if err != nil {
 		return nil, err
 	}
-	// todo: Stags_questsの更新
+	// todo: tags_questsの更新
 	// 全部消してからあるやつを再INSERT
 
 	quest, err := GetQuest(ctx, id)

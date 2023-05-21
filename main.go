@@ -5,10 +5,16 @@ import (
 	"traQuest/model"
 	"traQuest/router"
 
+	"github.com/joho/godotenv"
 	"github.com/srinathgs/mysqlstore"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		panic(fmt.Errorf("Error loading .env file: %w", err))
+	}
+
 	db, err := model.InitDB()
 	if err != nil {
 		panic(fmt.Errorf("DB Error: %w", err))

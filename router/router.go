@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/gob"
 	"net/http"
 	"os"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/srinathgs/mysqlstore"
+	"golang.org/x/oauth2"
 )
 
 func SetRouting(store *mysqlstore.MySQLStore) {
@@ -22,13 +24,16 @@ func SetRouting(store *mysqlstore.MySQLStore) {
 	e.Use(session.Middleware(store))
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 		AllowCredentials: true,
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 	}))
 	defer store.Close()
 	defer store.StopCleanup(store.Cleanup(time.Minute * 5))
+
+	gob.Register("sessions")
+	gob.Register(&oauth2.Token{})
 
 	api := e.Group("/api")
 	{

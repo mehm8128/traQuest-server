@@ -50,6 +50,7 @@ func SetRouting(store *mysqlstore.MySQLStore) {
 			apiQuests.GET("/:id", getQuest)
 			apiQuests.POST("/:id/complete", completeQuest)
 			apiQuests.POST("", postQuest)
+			apiQuests.POST("/:id/reject", rejectQuest)
 			apiQuests.POST("/:id/approve", approveQuest)
 			apiQuests.PUT("/:id", putQuest)
 		}

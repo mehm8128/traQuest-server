@@ -26,7 +26,7 @@ type Quest struct {
 
 type QuestDetail struct {
 	Quest
-	CompletedUsers []uuid.UUID `json:"completedUsers"`
+	CompletedUsers []string `json:"completedUsers"`
 }
 
 type TagQuest struct {
@@ -79,16 +79,18 @@ func GetUnapprovedQuests(ctx context.Context) ([]*Quest, error) {
 	return quests, nil
 }
 
-func GetQuest(ctx context.Context, id uuid.UUID) (*QuestDetail, error) {
+func GetQuest(ctx context.Context, id uuid.UUID, userId uuid.UUID) (*QuestDetail, error) {
 	var quest QuestDetail
 	err := db.GetContext(ctx, &quest, "SELECT * FROM quests WHERE id = ?", id)
 	if err != nil {
 		return nil, err
 	}
 	var count int
-	err = db.GetContext(ctx, &count, "SELECT COUNT(*) FROM users_quests WHERE quest_id = ?", id)
-	if err != nil {
-		return nil, err
+	if userId != uuid.Nil {
+		err = db.GetContext(ctx, &count, "SELECT COUNT(*) FROM users_quests WHERE user_id = ? && quest_id = ?", userId, id)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if count > 0 {
 		quest.Completed = true
@@ -100,8 +102,8 @@ func GetQuest(ctx context.Context, id uuid.UUID) (*QuestDetail, error) {
 		return nil, err
 	}
 	quest.Tags = tags
-	completedUsers := make([]uuid.UUID, 0)
-	err = db.SelectContext(ctx, &completedUsers, "SELECT user_id FROM users_quests WHERE quest_id = ?", id)
+	completedUsers := make([]string, 0)
+	err = db.SelectContext(ctx, &completedUsers, "SELECT users.name FROM users_quests JOIN users ON users.id = users_quests.user_id WHERE quest_id = ?", id)
 	if err != nil {
 		return nil, err
 	}
@@ -111,8 +113,9 @@ func GetQuest(ctx context.Context, id uuid.UUID) (*QuestDetail, error) {
 }
 
 func CompleteQuest(ctx context.Context, questID, userID uuid.UUID) error {
+	uuid := uuid.New()
 	createdAt := time.Now()
-	_, err := db.ExecContext(ctx, "INSERT INTO users_quests VALUES (?, ?, ?)", questID, userID, createdAt)
+	_, err := db.ExecContext(ctx, "INSERT INTO users_quests (id, quest_id, user_id, created_at) VALUES (?, ?, ?, ?)", uuid, questID, userID, createdAt)
 	if err != nil {
 		return err
 	}
@@ -149,8 +152,7 @@ func CreateQuest(ctx context.Context, title string, description string, level in
 			return nil, err
 		}
 	}
-
-	quest, err := GetQuest(ctx, ID)
+	quest, err := GetQuest(ctx, ID, uuid.Nil)
 	if err != nil {
 		return nil, err
 	}
@@ -158,8 +160,17 @@ func CreateQuest(ctx context.Context, title string, description string, level in
 	return quest, nil
 }
 
+func RejectQuest(ctx context.Context, id uuid.UUID) error {
+	_, err := db.ExecContext(ctx, "DELETE FROM quests WHERE id =?", id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func ApproveQuest(ctx context.Context, id uuid.UUID) (*QuestDetail, error) {
-	quest, err := GetQuest(ctx, id)
+	quest, err := GetQuest(ctx, id, uuid.Nil)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +193,7 @@ func UpdateQuest(ctx context.Context, id uuid.UUID, title string, description st
 	// todo: tags_questsの更新
 	// 全部消してからあるやつを再INSERT
 
-	quest, err := GetQuest(ctx, id)
+	quest, err := GetQuest(ctx, id, uuid.Nil)
 	if err != nil {
 		return nil, err
 	}

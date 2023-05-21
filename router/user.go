@@ -1,6 +1,7 @@
 package router
 
 import (
+	"errors"
 	"net/http"
 	"os"
 	"traQuest/model"
@@ -101,7 +102,7 @@ func callbackHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "something wrong in saving session")
 	}
 
-	user, err := getMeTraq(c, token)
+	user, err := getMeTraq(c)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -133,20 +134,7 @@ func callbackHandler(c echo.Context) error {
 }
 
 func getMe(c echo.Context) error {
-	sess, err := session.Get("sessions", c)
-	sess.Options.SameSite = http.SameSiteNoneMode
-	sess.Options.Secure = true
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "something wrong in getting session")
-	}
-	token, ok := sess.Values["access_token"].(*oauth2.Token)
-	if !ok {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusUnauthorized, "not authorized")
-	}
-
-	user, err := getMeTraq(c, token)
+	user, err := getMeTraq(c)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -168,9 +156,21 @@ func getMe(c echo.Context) error {
 	return echo.NewHTTPError(http.StatusOK, &me)
 }
 
-func getMeTraq(c echo.Context, token *oauth2.Token) (*traq.MyUserDetail, error) {
-	traqconf := traq.NewConfiguration()
+func getMeTraq(c echo.Context) (*traq.MyUserDetail, error) {
 	ctx := c.Request().Context()
+
+	sess, err := session.Get("sessions", c)
+	sess.Options.SameSite = http.SameSiteNoneMode
+	sess.Options.Secure = true
+	if err != nil {
+		return nil, err
+	}
+	token, ok := sess.Values["access_token"].(*oauth2.Token)
+	if !ok {
+		return nil, errors.New("access_token is not set")
+	}
+
+	traqconf := traq.NewConfiguration()
 	traqconf.HTTPClient = conf.Client(ctx, token)
 	client := traq.NewAPIClient(traqconf)
 

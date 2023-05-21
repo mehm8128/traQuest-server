@@ -14,10 +14,27 @@ type QuestRequest struct {
 	Level       int         `json:"level" db:"level"`
 	Tags        []uuid.UUID `json:"tags"`
 }
+type UserIDRequest struct {
+	UserID uuid.UUID `json:"userId"`
+}
+
+const adminUserID = "c714a848-2886-4c10-a313-de9bc61cb2bb"
 
 func getQuests(c echo.Context) error {
 	ctx := c.Request().Context()
-	quests, err := model.GetQuests(ctx, uuid.Nil) //todo: userID
+
+	me, err := getMeTraq(c)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	userID, err := uuid.Parse(me.Id)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	quests, err := model.GetQuests(ctx, userID)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -27,8 +44,20 @@ func getQuests(c echo.Context) error {
 }
 
 func getUnapprovedQuests(c echo.Context) error {
-	// todo: admin check
 	ctx := c.Request().Context()
+	me, err := getMeTraq(c)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	userID, err := uuid.Parse(me.Id)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if userID.String() != adminUserID {
+		return echo.NewHTTPError(http.StatusForbidden, "you are not admin")
+	}
 	quests, err := model.GetUnapprovedQuests(ctx)
 	if err != nil {
 		c.Logger().Error(err)
@@ -44,7 +73,17 @@ func getQuest(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
 	}
-	quest, err := model.GetQuest(ctx, ID)
+	me, err := getMeTraq(c)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	userID, err := uuid.Parse(me.Id)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	quest, err := model.GetQuest(ctx, ID, userID)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -59,7 +98,12 @@ func completeQuest(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
 	}
-	err = model.CompleteQuest(ctx, ID, uuid.Nil) //todo: userID
+	var userID UserIDRequest
+	err = c.Bind(&userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	err = model.CompleteQuest(ctx, ID, userID.UserID)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -82,11 +126,41 @@ func postQuest(c echo.Context) error {
 	return echo.NewHTTPError(http.StatusCreated, &res)
 }
 
+func rejectQuest(c echo.Context) error {
+	ctx := c.Request().Context()
+	ID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
+	}
+	var userID UserIDRequest
+	err = c.Bind(&userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if userID.UserID.String() != adminUserID {
+		return echo.NewHTTPError(http.StatusForbidden, "you are not admin")
+	}
+	err = model.RejectQuest(ctx, ID)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	return echo.NewHTTPError(http.StatusOK, "ok")
+}
+
 func approveQuest(c echo.Context) error {
 	ctx := c.Request().Context()
 	ID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
+	}
+	var userID UserIDRequest
+	err = c.Bind(&userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if userID.UserID.String() != adminUserID {
+		return echo.NewHTTPError(http.StatusForbidden, "you are not admin")
 	}
 	res, err := model.ApproveQuest(ctx, ID)
 	if err != nil {

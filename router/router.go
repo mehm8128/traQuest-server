@@ -23,8 +23,13 @@ func SetRouting(store *mysqlstore.MySQLStore) {
 	e.Use(middleware.Logger())
 	e.Use(session.Middleware(store))
 
+	clientOrigin := os.Getenv("FRONTEND_ORIGIN")
+	if clientOrigin == "" {
+		clientOrigin = "http://localhost:3000"
+	}
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{clientOrigin},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 		AllowCredentials: true,
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},

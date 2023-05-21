@@ -38,8 +38,6 @@ type TagQuest struct {
 
 func GetQuests(ctx context.Context, userID uuid.UUID) ([]*Quest, error) {
 	quests := make([]*Quest, 0)
-	// todo: completed怪しい
-	// todo: AND users_quests.user_id = ?
 	err := db.SelectContext(ctx, &quests, "SELECT quests.id, quests.number, quests.title, quests.description, quests.level, quests.created_at, quests.updated_at FROM quests WHERE quests.approved = true ORDER BY number")
 	if err != nil {
 		return nil, err

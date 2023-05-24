@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"traQuest/model"
@@ -165,6 +166,8 @@ func getMeTraq(c echo.Context) (*traq.MyUserDetail, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(sess)
+	fmt.Println(sess.Values)
 	token, ok := sess.Values["access_token"].(*oauth2.Token)
 	if !ok {
 		return nil, errors.New("access_token is not set")

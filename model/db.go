@@ -13,22 +13,22 @@ var (
 )
 
 func InitDB() (*sqlx.DB, error) {
-	user := os.Getenv("MARIADB_USERNAME")
+	user := os.Getenv("NS_MARIADB_USER")
 	if user == "" {
 		user = "mehm8128"
 	}
 
-	pass := os.Getenv("MARIADB_PASSWORD")
+	pass := os.Getenv("NS_MARIADB_PASSWORD")
 	if pass == "" {
 		pass = "math8128"
 	}
 
-	host := os.Getenv("MARIADB_HOSTNAME")
+	host := os.Getenv("NS_MARIADB_HOSTNAME")
 	if host == "" {
 		host = "localhost"
 	}
 
-	dbname := os.Getenv("MARIADB_DATABASE")
+	dbname := os.Getenv("NS_MARIADB_DATABASE")
 	if dbname == "" {
 		dbname = "traQuest"
 	}

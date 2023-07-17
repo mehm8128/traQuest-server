@@ -32,7 +32,7 @@ func InitDB() (*sqlx.DB, error) {
 	if dbname == "" {
 		dbname = "traQuest"
 	}
-	_db, err := sqlx.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local", user, pass, host, dbname))
+	_db, err := sqlx.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8mb4&parseTime=true&loc=Local", user, pass, host, dbname))
 	if err != nil {
 		return nil, err
 	}

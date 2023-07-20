@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"net/http"
 	"traQuest/model"
 
@@ -13,7 +12,7 @@ type User struct {
 }
 
 const (
-	SHOWCASE_USER_KEY = "X-Forwarded-User"
+	SHOWCASE_USER_KEY = "X-Traq-User"
 )
 
 func getMe(c echo.Context) error {
@@ -48,7 +47,6 @@ func getMe(c echo.Context) error {
 
 func GetMeTraq(c echo.Context) (string, error) {
 	userId := c.Request().Header.Get(SHOWCASE_USER_KEY)
-	fmt.Printf("%s %#v", userId, c.Request().Header)
 	if userId == "" {
 		return "", echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
 	"traQuest/model"
 
@@ -48,6 +49,7 @@ func getMe(c echo.Context) error {
 
 func GetMeTraq(c echo.Context) (string, error) {
 	userId := c.Request().Header.Get(SHOWCASE_USER_KEY)
+	fmt.Printf("%s %#v", userId, c.Request().Header)
 	if userId == "" {
 		return "", echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}

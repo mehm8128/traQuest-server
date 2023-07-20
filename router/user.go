@@ -47,7 +47,7 @@ func getMe(c echo.Context) error {
 }
 
 func GetMeTraq(c echo.Context) (string, error) {
-	userId := c.Request().Header.Get("SHOWCASE_USER_KEY")
+	userId := c.Request().Header.Get(SHOWCASE_USER_KEY)
 	if userId == "" {
 		return "", echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}

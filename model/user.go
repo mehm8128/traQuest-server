@@ -13,9 +13,9 @@ type User struct {
 	Score           int         `json:"score" db:"score"`
 }
 
-func GetUser(ctx context.Context, id uuid.UUID) (*User, error) {
+func GetUser(ctx context.Context, id string) (*User, error) {
 	var user User
-	err := db.GetContext(ctx, &user, "SELECT id, name, score FROM users WHERE id = ?", id)
+	err := db.GetContext(ctx, &user, "SELECT id, score FROM users WHERE id = ?", id)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func GetUser(ctx context.Context, id uuid.UUID) (*User, error) {
 	return &user, nil
 }
 
-func IsUserExist(ctx context.Context, id uuid.UUID) (bool, error) {
+func IsUserExist(ctx context.Context, id string) (bool, error) {
 	var count int
 	err := db.GetContext(ctx, &count, "SELECT COUNT(*) FROM users WHERE id = ?", id)
 	if err != nil {
@@ -40,8 +40,8 @@ func IsUserExist(ctx context.Context, id uuid.UUID) (bool, error) {
 	return count != 0, nil
 }
 
-func CreateUser(ctx context.Context, id uuid.UUID, name string) (*User, error) {
-	_, err := db.ExecContext(ctx, "INSERT INTO users (id, name, score) VALUES (?, ?, ?)", id, name, 0)
+func CreateUser(ctx context.Context, id string) (*User, error) {
+	_, err := db.ExecContext(ctx, "INSERT INTO users (id, score) VALUES (?, ?)", id, 0)
 	if err != nil {
 		return nil, err
 	}

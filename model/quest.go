@@ -36,7 +36,7 @@ type TagQuest struct {
 	CreatedAt time.Time `json:"createdAt" db:"created_at"`
 }
 
-func GetQuests(ctx context.Context, userID uuid.UUID) ([]*Quest, error) {
+func GetQuests(ctx context.Context, userID string) ([]*Quest, error) {
 	quests := make([]*Quest, 0)
 	err := db.SelectContext(ctx, &quests, "SELECT quests.id, quests.number, quests.title, quests.description, quests.level, quests.created_at, quests.updated_at FROM quests WHERE quests.approved = true ORDER BY number")
 	if err != nil {
@@ -77,14 +77,14 @@ func GetUnapprovedQuests(ctx context.Context) ([]*Quest, error) {
 	return quests, nil
 }
 
-func GetQuest(ctx context.Context, id uuid.UUID, userId uuid.UUID) (*QuestDetail, error) {
+func GetQuest(ctx context.Context, id uuid.UUID, userId string) (*QuestDetail, error) {
 	var quest QuestDetail
 	err := db.GetContext(ctx, &quest, "SELECT * FROM quests WHERE id = ?", id)
 	if err != nil {
 		return nil, err
 	}
 	var count int
-	if userId != uuid.Nil {
+	if userId != "" {
 		err = db.GetContext(ctx, &count, "SELECT COUNT(*) FROM users_quests WHERE user_id = ? && quest_id = ?", userId, id)
 		if err != nil {
 			return nil, err
@@ -150,7 +150,7 @@ func CreateQuest(ctx context.Context, title string, description string, level in
 			return nil, err
 		}
 	}
-	quest, err := GetQuest(ctx, ID, uuid.Nil)
+	quest, err := GetQuest(ctx, ID, "")
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func RejectQuest(ctx context.Context, id uuid.UUID) error {
 }
 
 func ApproveQuest(ctx context.Context, id uuid.UUID) (*QuestDetail, error) {
-	quest, err := GetQuest(ctx, id, uuid.Nil)
+	quest, err := GetQuest(ctx, id, "")
 	if err != nil {
 		return nil, err
 	}
@@ -191,7 +191,7 @@ func UpdateQuest(ctx context.Context, id uuid.UUID, title string, description st
 	// todo: tags_questsの更新
 	// 全部消してからあるやつを再INSERT
 
-	quest, err := GetQuest(ctx, id, uuid.Nil)
+	quest, err := GetQuest(ctx, id, "")
 	if err != nil {
 		return nil, err
 	}

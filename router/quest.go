@@ -23,18 +23,13 @@ const adminUserID = "c714a848-2886-4c10-a313-de9bc61cb2bb"
 func getQuests(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	me, err := getMeTraq(c)
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	userID, err := uuid.Parse(me.Id)
+	userId, err := GetMeTraq(c)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	quests, err := model.GetQuests(ctx, userID)
+	quests, err := model.GetQuests(ctx, userId)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -45,17 +40,12 @@ func getQuests(c echo.Context) error {
 
 func getUnapprovedQuests(c echo.Context) error {
 	ctx := c.Request().Context()
-	me, err := getMeTraq(c)
+	userId, err := GetMeTraq(c)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	userID, err := uuid.Parse(me.Id)
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	if userID.String() != adminUserID {
+	if userId != adminUserID {
 		return echo.NewHTTPError(http.StatusForbidden, "you are not admin")
 	}
 	quests, err := model.GetUnapprovedQuests(ctx)
@@ -73,17 +63,12 @@ func getQuest(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
 	}
-	me, err := getMeTraq(c)
+	userId, err := GetMeTraq(c)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	userID, err := uuid.Parse(me.Id)
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	quest, err := model.GetQuest(ctx, ID, userID)
+	quest, err := model.GetQuest(ctx, ID, userId)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)

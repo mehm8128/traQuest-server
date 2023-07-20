@@ -1,7 +1,6 @@
 package router
 
 import (
-	"encoding/gob"
 	"net/http"
 	"os"
 	"time"
@@ -10,7 +9,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/srinathgs/mysqlstore"
-	"golang.org/x/oauth2"
 )
 
 func SetRouting(store *mysqlstore.MySQLStore) {
@@ -37,15 +35,10 @@ func SetRouting(store *mysqlstore.MySQLStore) {
 	defer store.Close()
 	defer store.StopCleanup(store.Cleanup(time.Minute * 5))
 
-	gob.Register("sessions")
-	gob.Register(&oauth2.Token{})
-
 	api := e.Group("/api")
 	{
 		apiUsers := api.Group("/users")
 		{
-			apiUsers.GET("/authorize", authorizeHandler)
-			apiUsers.GET("/callback", callbackHandler)
 			apiUsers.GET("/me", getMe)
 		}
 		apiQuests := api.Group("/quests")

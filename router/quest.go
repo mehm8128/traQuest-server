@@ -18,7 +18,7 @@ type UserIDRequest struct {
 	UserID string `json:"userId"`
 }
 
-const adminUserID = "c714a848-2886-4c10-a313-de9bc61cb2bb"
+const adminUserID = "mehm8128"
 
 func getQuests(c echo.Context) error {
 	ctx := c.Request().Context()

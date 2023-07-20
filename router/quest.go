@@ -15,7 +15,7 @@ type QuestRequest struct {
 	Tags        []uuid.UUID `json:"tags"`
 }
 type UserIDRequest struct {
-	UserID uuid.UUID `json:"userId"`
+	UserID string `json:"userId"`
 }
 
 const adminUserID = "c714a848-2886-4c10-a313-de9bc61cb2bb"
@@ -122,7 +122,7 @@ func rejectQuest(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	if userID.UserID.String() != adminUserID {
+	if userID.UserID != adminUserID {
 		return echo.NewHTTPError(http.StatusForbidden, "you are not admin")
 	}
 	err = model.RejectQuest(ctx, ID)
@@ -144,7 +144,7 @@ func approveQuest(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	if userID.UserID.String() != adminUserID {
+	if userID.UserID != adminUserID {
 		return echo.NewHTTPError(http.StatusForbidden, "you are not admin")
 	}
 	res, err := model.ApproveQuest(ctx, ID)

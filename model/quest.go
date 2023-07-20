@@ -110,7 +110,7 @@ func GetQuest(ctx context.Context, id uuid.UUID, userId string) (*QuestDetail, e
 	return &quest, nil
 }
 
-func CompleteQuest(ctx context.Context, questID, userID uuid.UUID) error {
+func CompleteQuest(ctx context.Context, questID uuid.UUID, userID string) error {
 	uuid := uuid.New()
 	createdAt := time.Now()
 	_, err := db.ExecContext(ctx, "INSERT INTO users_quests (id, quest_id, user_id, created_at) VALUES (?, ?, ?, ?)", uuid, questID, userID, createdAt)

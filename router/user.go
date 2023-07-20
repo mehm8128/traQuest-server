@@ -4,13 +4,12 @@ import (
 	"net/http"
 	"traQuest/model"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 type User struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 const (

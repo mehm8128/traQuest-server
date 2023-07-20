@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `tags_quests` (
 
 CREATE TABLE IF NOT EXISTS `users_quests` (
   `id` char(36) NOT NULL UNIQUE,
-  `user_id` char(36) NOT NULL,
+  `user_id` varchar(32) NOT NULL,
   `quest_id` char(36) NOT NULL,
   `created_at` datetime NOT NULL,
   PRIMARY KEY (`id`),

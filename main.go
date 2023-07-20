@@ -6,7 +6,6 @@ import (
 	"traQuest/router"
 
 	"github.com/joho/godotenv"
-	"github.com/srinathgs/mysqlstore"
 )
 
 func main() {
@@ -15,14 +14,10 @@ func main() {
 		fmt.Println("Error loading .env file: ", err)
 	}
 
-	db, err := model.InitDB()
+	_, err = model.InitDB()
 	if err != nil {
 		panic(fmt.Errorf("DB Error: %w", err))
 	}
 
-	store, err := mysqlstore.NewMySQLStoreFromConnection(db.DB, "sessions", "/", 3600, []byte("secret-token"))
-	if err != nil {
-		panic(err)
-	}
-	router.SetRouting(store)
+	router.SetRouting()
 }

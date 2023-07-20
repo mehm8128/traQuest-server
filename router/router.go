@@ -3,15 +3,12 @@ package router
 import (
 	"net/http"
 	"os"
-	"time"
 
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/srinathgs/mysqlstore"
 )
 
-func SetRouting(store *mysqlstore.MySQLStore) {
+func SetRouting() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8000"
@@ -19,7 +16,6 @@ func SetRouting(store *mysqlstore.MySQLStore) {
 
 	e := echo.New()
 	e.Use(middleware.Logger())
-	e.Use(session.Middleware(store))
 
 	clientOrigin := os.Getenv("FRONTEND_ORIGIN")
 	if clientOrigin == "" {
@@ -32,8 +28,6 @@ func SetRouting(store *mysqlstore.MySQLStore) {
 		AllowCredentials: true,
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 	}))
-	defer store.Close()
-	defer store.StopCleanup(store.Cleanup(time.Minute * 5))
 
 	api := e.Group("/api")
 	{

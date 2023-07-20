@@ -101,7 +101,7 @@ func GetQuest(ctx context.Context, id uuid.UUID, userId string) (*QuestDetail, e
 	}
 	quest.Tags = tags
 	completedUsers := make([]string, 0)
-	err = db.SelectContext(ctx, &completedUsers, "SELECT users.name FROM users_quests JOIN users ON users.id = users_quests.user_id WHERE quest_id = ?", id)
+	err = db.SelectContext(ctx, &completedUsers, "SELECT users.id FROM users_quests JOIN users ON users.id = users_quests.user_id WHERE quest_id = ?", id)
 	if err != nil {
 		return nil, err
 	}

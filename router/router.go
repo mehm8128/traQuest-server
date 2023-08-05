@@ -17,13 +17,14 @@ func SetRouting() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 
-	clientOrigin := os.Getenv("FRONTEND_ORIGIN")
-	if clientOrigin == "" {
-		clientOrigin = "http://localhost:3000"
-	}
+  var allowOrigins []string
+  if os.Getenv("FRONTEND_ORIGIN") != "" {
+    allowOrigins = append(allowOrigins, os.Getenv("FRONTEND_ORIGIN"))
+  } 
+  allowOrigins = append(allowOrigins, "http://localhost:3000")
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{clientOrigin},
+    AllowOrigins:     allowOrigins,
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, "X-Traq-User"},
 		AllowCredentials: true,
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
